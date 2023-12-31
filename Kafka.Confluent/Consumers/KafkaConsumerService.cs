@@ -25,7 +25,7 @@ namespace Kafka
             var conf = new ConsumerConfig
             {
                 GroupId = "st_consumer_group3",
-                BootstrapServers = "localhost:9092",
+                BootstrapServers = "localhost:9092", // см. docker-compose или docker-compose.old
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 //  EnableAutoCommit = true
 
@@ -52,8 +52,14 @@ namespace Kafka
                         continue;
                     }
 
+                    
+
                     if (consumeResult?.Message != null)
-                        Console.WriteLine($"Message: {consumeResult.Message.Value} received from {consumeResult.TopicPartitionOffset}");
+                        Console.WriteLine($"Message: {consumeResult.Message.Value} received from {consumeResult.TopicPartitionOffset} " +
+                            $"partition: {consumeResult.TopicPartition}," +
+                            $"offset : {consumeResult.Offset}" +
+                            $" key {consumeResult.Key}");
+
                 }
 
 

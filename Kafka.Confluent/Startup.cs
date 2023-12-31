@@ -1,4 +1,6 @@
 using Confluent.Kafka;
+using Kafka.Consumers;
+using Kafka.Dto;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,14 +21,21 @@ namespace Kafka
         {
             services.AddControllers();
             services.AddHostedService<KafkaConsumerService>();
+            
+            //services.AddHostedService<KafkaConsumerService3>();
+
+            services.AddHostedService<ConcreteConsumer>();
+
             services.AddSingleton<KafkaClientHandle>();
             services.AddSingleton<KafkaDependentProducer<Null, string>>();
+            services.AddSingleton<KafkaExtendedDependentProducer<string, SomeDto>>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kafka producer", Version = "v1" });
             });
 
-            // services.AddHostedService<TestHostedService>();
+         
             // services.AddSingleton<IHostedService, KafkaConsumerHostedService>();
         }
 

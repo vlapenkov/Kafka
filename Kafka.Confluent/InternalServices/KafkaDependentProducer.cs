@@ -15,6 +15,9 @@ namespace Kafka
             kafkaHandle = new DependentProducerBuilder<K, V>(handle.Handle).Build();
         }
 
+        public Task ProduceAsync(TopicPartition topicPartition, Message<K, V> message) =>
+        this.kafkaHandle.ProduceAsync(topicPartition, message);
+
         /// <summary>
         ///     Asychronously produce a message and expose delivery information
         ///     via the returned Task. Use this method of producing if you would
