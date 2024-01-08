@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Kafka.Dto
 {
-    public class SomeDto
+    public record SomeDto
     {
         public int Id { get; set; }
 

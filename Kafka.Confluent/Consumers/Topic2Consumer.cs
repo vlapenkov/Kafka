@@ -1,4 +1,5 @@
-﻿using Kafka.Dto;
+﻿using Kafka.Consumers.Obsolete;
+using Kafka.Dto;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
@@ -6,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Kafka.Consumers
 {
-    public class ConcreteConsumer : BaseConsumer<string,SomeDto>
+    public class Topic2Consumer : BaseConsumer<string,SomeDto>
     {
-        public ConcreteConsumer(IConfiguration configuration):base(configuration)
+        public Topic2Consumer(IConfiguration configuration):base(configuration)
         {
 
         }
@@ -17,7 +18,7 @@ namespace Kafka.Consumers
 
         public override Task Handle(SomeDto value)
         {
-            Console.WriteLine(value);
+            Console.WriteLine($"From topic 2: {value}");
             return Task.CompletedTask;
         }
 

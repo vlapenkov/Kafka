@@ -1,20 +1,16 @@
 ﻿using Confluent.Kafka;
-using Kafka.Dto;
-using Kafka.Serailizers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Confluent.Kafka.ConfigPropertyNames;
 
-namespace Kafka
+namespace Kafka.Consumers.Obsolete
 {
-    public class KafkaConsumerService3 : BackgroundService
+    public class KafkaConsumerService : BackgroundService
     {
-        private static readonly string topic = "topic2";
+        private readonly string topic = "simpletalk_topic";
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -26,30 +22,26 @@ namespace Kafka
 
         private void StartConsumerLoop(CancellationToken stoppingToken)
         {
-            int commitPeriod = 2;
-
             var conf = new ConsumerConfig
             {
-                GroupId = "st_consumer_fromtopic3",
-                BootstrapServers = "localhost:9092",
+                GroupId = "st_consumer_group3",
+                BootstrapServers = "localhost:9092", // см. docker-compose или docker-compose.old
                 AutoOffsetReset = AutoOffsetReset.Earliest,
-                EnableAutoCommit = false,
-                //EnableAutoOffsetStore = false,
-              
+                //  EnableAutoCommit = true
 
             };
 
-            using (var consumer = new ConsumerBuilder<string, SomeDto>(conf)                
-                .SetValueDeserializer(new GenericSerializer<SomeDto>())
+            using (var builder = new ConsumerBuilder<Ignore,
+                string>(conf)
                 .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
                 .Build())
             {
-                consumer.Subscribe(topic);
+                builder.Subscribe(topic);
 
                 while (!stoppingToken.IsCancellationRequested)
                 {
 
-                    ConsumeResult<string, SomeDto> consumeResult = consumer.Consume(stoppingToken);
+                    ConsumeResult<Ignore, string> consumeResult = builder.Consume(stoppingToken);
 
                     // builder.Commit();
                     if (consumeResult.IsPartitionEOF)
@@ -61,26 +53,12 @@ namespace Kafka
                     }
 
 
+
                     if (consumeResult?.Message != null)
-                        Console.WriteLine($"Message: {consumeResult.Message.Value} received"+
+                        Console.WriteLine($"Message: {consumeResult.Message.Value} received from {consumeResult.TopicPartitionOffset} " +
                             $"partition: {consumeResult.TopicPartition}," +
-                            $"offset : {consumeResult.Offset}," +
+                            $"offset : {consumeResult.Offset}" +
                             $" key {consumeResult.Key}");
-
-
-
-                  //  if (consumeResult.Offset % commitPeriod == 0)
-                    {
-                        try
-                        {
-                          //  consumer.Commit(consumeResult);
-                            //consumer.StoreOffset(consumeResult);
-                        }
-                        catch (KafkaException e)
-                        {
-                            Console.WriteLine($"Commit error: {e.Error.Reason}");
-                        }
-                    }
 
                 }
 

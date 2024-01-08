@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using Kafka.Dto;
+using Kafka.Producers;
 using Kafka.Serailizers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Confluent.Kafka.ConfigPropertyNames;
 
 namespace Kafka
 {
@@ -15,52 +17,55 @@ namespace Kafka
     [ApiController]
     public class KafkaProducerController : ControllerBase
     {
-        private readonly KafkaDependentProducer<Null, string> _producer;
-        private readonly KafkaExtendedDependentProducer<string, SomeDto> _producer2;
+        // старая реализация
+        private readonly KafkaDependentProducer<Null, string> _producer;        
 
-        //private static readonly ProducerConfig config = new ProducerConfig
-        //{
-        //    BootstrapServers = "localhost:9092",
-        //    //  MessageTimeoutMs =5000,
-        //   // Acks = Acks.None,
-        //    //  CompressionLevel = Com
+        private readonly IKafkaProducer<string, SomeDto> _producer2;
 
-        //};
+        private readonly IKafkaProducer<string, ExtendedDto> _producer3;
 
-        //private static readonly IProducer<Null, string> _producer = new ProducerBuilder<Null, string>(config).Build();
+
         private readonly string topic = "simpletalk_topic";
-        private readonly string _topic2 = "topic2";
 
-        public KafkaProducerController(KafkaDependentProducer<Null, string> producer, KafkaExtendedDependentProducer<string, SomeDto> producer2)
+
+        public KafkaProducerController(
+            //KafkaDependentProducer<Null, string> producer,
+            IKafkaProducer<string, SomeDto> producer2,
+            IKafkaProducer<string, ExtendedDto> producer3)
         {
-            _producer = producer;
+            //_producer = producer;
+            _producer = null;
             _producer2 = producer2;
+            _producer3 = producer3;
         }
+       
 
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
+        //[HttpPost]
+        //public async Task<IActionResult> Post([FromQuery] string message)
+        //{          
+        // await _producer.ProduceAsync(topic, new Message<Null, string> { Value = $"{message} {DateTime.Now}" });
+         
+        //    return Ok();
 
-            return Ok();
-
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Post([FromQuery] string message)
-        {
-            //using (var producer =
-            //     new ProducerBuilder<Null, string>(config).Build())
-            {
-                await _producer.ProduceAsync(topic, new Message<Null, string> { Value = $"{message} {DateTime.Now}" });
-            }
-            return Ok();
-
-        }
+        //}
 
         [HttpPost("PostTopic2")]
         public async Task<IActionResult> PostToTopic2([FromQuery] SomeDto message)
         {
-            await _producer2.ProduceAsync(_topic2, new Message<string, SomeDto>
+            await _producer2.ProduceAsync("topic2", new Message<string, SomeDto>
+            {
+                Key = Guid.NewGuid().ToString(),
+                Value = message
+            });
+
+            return Ok();
+
+        }
+
+        [HttpPost("PostTopic3")]
+        public async Task<IActionResult> PostToTopic3([FromQuery] ExtendedDto message)
+        {
+            await _producer3.ProduceAsync("topic3", new Message<string, ExtendedDto>
             {
                 Key = Guid.NewGuid().ToString(),
                 Value = message
@@ -72,6 +77,7 @@ namespace Kafka
 
 
 
+        #region PostToPartitions
         [HttpPost("PostToPartition1")]
         public async Task<IActionResult> Post1([FromQuery] string message)
         {
@@ -94,5 +100,6 @@ namespace Kafka
 
         }
 
+        #endregion
     }
 }

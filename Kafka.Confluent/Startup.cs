@@ -1,6 +1,8 @@
 using Confluent.Kafka;
 using Kafka.Consumers;
+using Kafka.Consumers.Obsolete;
 using Kafka.Dto;
+using Kafka.Producers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,14 +23,23 @@ namespace Kafka
         {
             services.AddControllers();
             services.AddHostedService<KafkaConsumerService>();
+
+
+
+
+
+            services.AddKafkaConsumer<Topic2Consumer>();
+            services.AddKafkaConsumer<Topic3Consumer>();
+                       
+
+
+            //services.AddSingleton<KafkaClientHandle>();
+            //services.AddSingleton<KafkaDependentProducer<Null, string>>();
+
+            services.AddKafkaProducer<string, SomeDto>();
+            services.AddKafkaProducer<string, ExtendedDto>();
+
             
-            //services.AddHostedService<KafkaConsumerService3>();
-
-            services.AddHostedService<ConcreteConsumer>();
-
-            services.AddSingleton<KafkaClientHandle>();
-            services.AddSingleton<KafkaDependentProducer<Null, string>>();
-            services.AddSingleton<KafkaExtendedDependentProducer<string, SomeDto>>();
 
             services.AddSwaggerGen(c =>
             {
