@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Kafka.Producers;
 using Kafka.Serailizers;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Kafka
 {
-    public class KafkaExtendedDependentProducer<K, V> : IDisposable
+    public class KafkaExtendedDependentProducer<K, V> : IDisposable, IKafkaProducer<K,V>
     {
         IProducer<K, V> kafkaHandle;
 

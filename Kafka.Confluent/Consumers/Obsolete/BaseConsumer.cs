@@ -9,12 +9,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Confluent.Kafka.ConfigPropertyNames;
 
-namespace Kafka
+namespace Kafka.Consumers.Obsolete
 {
-    public abstract class BaseConsumer<K, V> : BackgroundService
+
+    public abstract class BaseConsumer : BackgroundService { }
+    public abstract class BaseConsumer<K, V> : BaseConsumer
     {
         private readonly IConsumer<K, V> _kafkaConsumer;
-             
+
 
         public abstract string Topic { get; }
 
@@ -30,7 +32,7 @@ namespace Kafka
                     .Build();
         }
 
-        public abstract Task Handle( V value);
+        public abstract Task Handle(V value);
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -76,11 +78,11 @@ namespace Kafka
                 }
 
             }
-            
-        }  
 
-    
-        
+        }
+
+
+
 
         public override void Dispose()
         {
