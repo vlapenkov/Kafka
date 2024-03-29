@@ -1,5 +1,4 @@
-﻿using Kafka.Consumers.Obsolete;
-using Kafka.Dto;
+﻿using Kafka.Dto;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;

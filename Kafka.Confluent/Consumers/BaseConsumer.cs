@@ -9,16 +9,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Confluent.Kafka.ConfigPropertyNames;
 
-namespace Kafka
+namespace Kafka.Consumers
 {
-    public abstract class BaseHostedConsumer<K, V> : IHostedService
+
+    public abstract class BaseConsumer : BackgroundService { }
+    public abstract class BaseConsumer<K, V> : BaseConsumer
     {
-        private readonly IConsumer<K, V> _kafkaConsumer;      
-             
+        private readonly IConsumer<K, V> _kafkaConsumer;
+
 
         public abstract string Topic { get; }
 
-        public BaseHostedConsumer(IConfiguration config)
+        public BaseConsumer(IConfiguration config)
         {
             var conf = new ConsumerConfig();
             config.GetSection("Kafka:ConsumerSettings").Bind(conf);
@@ -30,9 +32,16 @@ namespace Kafka
                     .Build();
         }
 
-        public abstract Task Handle( V value);
+        public abstract Task Handle(V value);
 
-        
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            await Task.Yield();
+
+           await Task.Run(() => StartConsumerLoop(stoppingToken));
+
+            //return Task.CompletedTask;
+        }
 
         protected async Task StartConsumerLoop(CancellationToken cancellationToken)
         {
@@ -54,7 +63,9 @@ namespace Kafka
 
                     await Handle(res);
 
-                    _kafkaConsumer.Commit(consumeResult);
+                    // _kafkaConsumer.Commit(consumeResult);
+
+                    _kafkaConsumer.StoreOffset(consumeResult);
                 }
                 catch (KafkaException e)
                 {
@@ -71,30 +82,17 @@ namespace Kafka
                 }
 
             }
-            
-        }  
 
-    
-        
+        }
 
-        public void Dispose()
+
+
+
+        public override void Dispose()
         {
             _kafkaConsumer.Close();
             _kafkaConsumer.Dispose();
-            
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-             Task.Run(() => StartConsumerLoop(cancellationToken)).ConfigureAwait(false);
-
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-
-            return Task.CompletedTask;
+            base.Dispose();
         }
     }
 }

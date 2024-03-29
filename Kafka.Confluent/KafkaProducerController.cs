@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static Confluent.Kafka.ConfigPropertyNames;
 
@@ -17,6 +19,8 @@ namespace Kafka
     [ApiController]
     public class KafkaProducerController : ControllerBase
     {
+
+         static int counter = 0;
         // старая реализация
         private readonly KafkaDependentProducer<Null, string> _producer;        
 
@@ -57,6 +61,10 @@ namespace Kafka
                 Key = Guid.NewGuid().ToString(),
                 Value = message
             });
+
+            Interlocked.Increment(ref counter);
+
+            Console.WriteLine(counter);
 
             return Ok();
 

@@ -11,16 +11,14 @@ using static Confluent.Kafka.ConfigPropertyNames;
 
 namespace Kafka.Consumers.Obsolete
 {
-
-    public abstract class BaseConsumer : BackgroundService { }
-    public abstract class BaseConsumer<K, V> : BaseConsumer
+    public abstract class BaseHostedConsumer<K, V> : IHostedService
     {
         private readonly IConsumer<K, V> _kafkaConsumer;
 
 
         public abstract string Topic { get; }
 
-        public BaseConsumer(IConfiguration config)
+        public BaseHostedConsumer(IConfiguration config)
         {
             var conf = new ConsumerConfig();
             config.GetSection("Kafka:ConsumerSettings").Bind(conf);
@@ -34,12 +32,7 @@ namespace Kafka.Consumers.Obsolete
 
         public abstract Task Handle(V value);
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            Task.Run(() => StartConsumerLoop(stoppingToken));
 
-            return Task.CompletedTask;
-        }
 
         protected async Task StartConsumerLoop(CancellationToken cancellationToken)
         {
@@ -84,11 +77,24 @@ namespace Kafka.Consumers.Obsolete
 
 
 
-        public override void Dispose()
+        public void Dispose()
         {
             _kafkaConsumer.Close();
             _kafkaConsumer.Dispose();
-            base.Dispose();
+
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            Task.Run(() => StartConsumerLoop(cancellationToken)).ConfigureAwait(false);
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+
+            return Task.CompletedTask;
         }
     }
 }

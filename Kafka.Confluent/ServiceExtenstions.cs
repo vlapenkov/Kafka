@@ -1,5 +1,4 @@
 ﻿using Kafka.Consumers;
-using Kafka.Consumers.Obsolete;
 using Kafka.Dto;
 using Kafka.Producers;
 using Microsoft.Extensions.DependencyInjection;
